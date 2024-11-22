@@ -1,0 +1,137 @@
+﻿@page "/pago"
+
+@inject Tienda.Servicios.CarritoService CarritoService
+@using Tienda.Modelos
+
+<h3 class="titulo">Datos de Pago</h3>
+
+@if (PagoCompletado)
+{
+    <div class="mensaje-gracias">
+        <h4>¡Gracias por comprar en la tienda de Emill Peralta!</h4>
+    </div>
+}
+else
+{
+    <div class="formulario">
+        <h4>Información de pago</h4>
+
+        <label for="tarjeta">Número de tarjeta</label>
+        <input type="text" id="tarjeta" placeholder="Ingrese su número de tarjeta" />
+
+        <label for="nombre">Nombre en la tarjeta</label>
+        <input type="text" id="nombre" placeholder="Nombre del titular" />
+
+        <label for="monto">Monto a pagar</label>
+        <input type="text" id="monto" value="RD$ @Total" disabled />
+
+        <label for="metodoTransporte">Método de transporte</label>
+        <select id="metodoTransporte">
+            <option value="tienda">Recoger en tienda</option>
+            <option value="delivery">Envío a domicilio</option>
+        </select>
+
+        <button class="btn-pagar" @onclick="ProcesarPago">Realizar pago</button>
+    </div>
+}
+
+@code {
+    private List<CarritoItem> ListaCarrito = new();
+    private decimal Total => ListaCarrito.Sum(c => c.Cantidad * c.Producto.Precio);
+    private bool PagoCompletado { get; set; } = false;  // Variable para mostrar el mensaje
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaCarrito = await CarritoService.ObtenerCarritoAsync();
+    }
+
+    private void ProcesarPago()
+    {
+        // Lógica para procesar el pago
+        // Por ahora, solo mostramos el mensaje de agradecimiento
+
+        // Mostrar mensaje de gracias y deshabilitar la página de pago
+        PagoCompletado = true;
+    }
+}
+
+<style>
+    .titulo {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #6a1b9a;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 1.8em;
+    }
+
+    .formulario {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .formulario h4 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #6a1b9a;
+        }
+
+        .formulario label {
+            font-size: 1em;
+            margin-bottom: 5px;
+            display: block;
+            color: #555;
+        }
+
+        .formulario input, .formulario select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            color: #333;
+            transition: border 0.3s ease;
+        }
+
+            .formulario input:focus, .formulario select:focus {
+                border-color: #6a1b9a;
+                outline: none;
+            }
+
+    .btn-pagar {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+
+        .btn-pagar:hover {
+            background-color: #388e3c;
+            transform: scale(1.05);
+        }
+
+        .btn-pagar:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+    .mensaje-gracias {
+        text-align: center;
+        padding: 20px;
+        background-color: #4caf50;
+        color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 30px;
+        font-size: 1.2em;
+    }
+</style>

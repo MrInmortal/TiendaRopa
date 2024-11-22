@@ -1,0 +1,128 @@
+﻿@page "/catalogo"
+
+@inject Tienda.Servicios.CarritoService CarritoService
+@using Tienda.Modelos
+
+<h3 class="titulo">Catálogo Exclusivo de Productos</h3>
+
+<div class="grid-productos">
+    @foreach (var producto in Productos)
+    {
+        <div class="carta-producto">
+            <img src="@producto.ImagenURL" alt="@producto.Nombre" class="imagen-producto" />
+            <div class="info-producto">
+                <h4 class="nombre-producto">@producto.Nombre</h4>
+                <p class="descripcion-producto">@producto.Descripcion</p>
+                <p class="precio-producto">RD$ @String.Format("{0:n2}", producto.Precio)</p>
+                <button class="btn-agregar" @onclick="() => AgregarAlCarrito(producto)">Agregar al carrito</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Producto> Productos = new List<Producto>
+    {
+        new Producto { Id = 1, Nombre = "Los Angeles Lakers", Descripcion = "Poloche Jordan NBA Max90 - Hombre", Precio = 1099.00M, ImagenURL = "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco,u_126ab356-44d8-4a06-89b4-fcdcc8df0245,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/e6ca2145-72cd-496d-994a-95f85a442e75/LAL+M+NK+CTS+STMT+M90+SSTEE.png" },
+        new Producto { Id = 2, Nombre = "Brooklyn Nets", Descripcion = "Poloche Jordan NBA Max90 - Hombre", Precio = 1249.00M, ImagenURL = "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/u_126ab356-44d8-4a06-89b4-fcdcc8df0245,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/a8b5513e-f946-49bd-b119-cdd2293fc608/BKN+M+NK+CTS+STMT+M90+SSTEE.png" },
+        new Producto { Id = 3, Nombre = "Nike Therma", Descripcion = "Chaqueta de fitness con cremallera completa Therma-FIT - Hombre", Precio = 2549.00M, ImagenURL = "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/c013660a-93fe-48eb-bd2f-ca731d344905/M+NK+TF+HD+FZ.png" },
+        new Producto { Id = 4, Nombre = "Jordan Brooklyn Fleece", Descripcion = "Abrigo de chándal de cuello redondo - Hombre", Precio = 2999.00M, ImagenURL = "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/u_126ab356-44d8-4a06-89b4-fcdcc8df0245,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/b4b104f2-9de2-4407-9a65-8b9040da1107/M+J+ESS+FLC+CREW.png" },
+        new Producto { Id = 5, Nombre = "Nike Standard Issue", Descripcion = "Pantalón de baloncesto Dri-FIT - Hombre", Precio = 5000.00M, ImagenURL = "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/e71d453d-36f3-494b-9bbc-f6c1a8191be1/M+NK+DF+SI+PANT.png" },
+        new Producto { Id = 6, Nombre = "Nike Flex Rep", Descripcion = "Pantalón deportivo Dri-FIT - Hombre", Precio = 4899.00M, ImagenURL = "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/31b0e3c4-8fe4-4d7c-bd86-1692e3775b0b/M+NK+DF+FLEX+REP+PANT.png" },
+        new Producto { Id = 7, Nombre = "Nike Revolution 7 EasyOn", Descripcion = "Tenis deportivos - Hombre", Precio = 3599.00M, ImagenURL = "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/ca929f7e-f433-46b7-8d83-1a6171c172ce/NIKE+REVOLUTION+7+EASYON.png" },
+        new Producto { Id = 8, Nombre = "Nike Structure 25", Descripcion = "Tenis deportivos - Hombre", Precio = 3999.00M, ImagenURL = "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/9d38718b-1d0c-4acd-b81f-ec1bfc2201ff/NIKE+AIR+ZOOM+STRUCTURE+25.png" }
+    };
+
+    private async Task AgregarAlCarrito(Producto producto)
+    {
+        var carrito = await CarritoService.ObtenerCarritoAsync();
+        var item = carrito.FirstOrDefault(c => c.Producto.Id == producto.Id);
+
+        if (item != null)
+        {
+            item.Cantidad++;
+        }
+        else
+        {
+            carrito.Add(new CarritoItem { Producto = producto, Cantidad = 1 });
+        }
+
+        await CarritoService.GuardarCarritoAsync(carrito);
+    }
+}
+
+<style>
+    .titulo {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #6a1b9a;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 1.8em;
+    }
+
+    .grid-productos {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 10px;
+    }
+
+    .carta-producto {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s;
+    }
+
+        .carta-producto:hover {
+            transform: scale(1.03);
+        }
+
+    .imagen-producto {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .info-producto {
+        padding: 15px;
+    }
+
+    .nombre-producto {
+        font-size: 1.2em;
+        margin: 10px 0;
+        color: #333;
+    }
+
+    .descripcion-producto {
+        font-size: 0.95em;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .precio-producto {
+        font-size: 1.1em;
+        color: #333;
+        margin-bottom: 10px;
+        font-family: Arial, sans-serif;
+    }
+
+    .btn-agregar {
+        padding: 10px 20px;
+        background: #0288d1;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+
+        .btn-agregar:hover {
+            background: #01579b;
+            transform: scale(1.05);
+        }
+</style>

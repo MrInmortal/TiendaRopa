@@ -1,0 +1,183 @@
+﻿@page "/carrito"
+
+@inject Tienda.Servicios.CarritoService CarritoService
+@using Tienda.Modelos
+@inject NavigationManager NavigationManager
+
+<h3 class="titulo">Carrito de Compras</h3>
+
+@if (ListaCarrito.Count == 0)
+{
+    <p class="carrito-vacio">Tu carrito está vacío.</p>
+}
+else
+{
+    <div class="carrito">
+        @foreach (var item in ListaCarrito)
+        {
+            <div class="item-carrito">
+                <img src="@item.Producto.ImagenURL" alt="@item.Producto.Nombre" class="imagen-item" />
+                <div class="info-item">
+                    <h4>@item.Producto.Nombre</h4>
+                    <p>Cantidad: <strong>@item.Cantidad</strong></p>
+                    <p>Subtotal: <strong>RD$ @String.Format("{0:n2}", item.Cantidad * item.Producto.Precio)</strong></p>
+                </div>
+                <button class="btn-eliminar" @onclick="() => EliminarProducto(item)">X</button> <!-- Botón de eliminar -->
+            </div>
+        }
+
+        <div class="resumen">
+            <p><strong>Total: RD$ @String.Format("{0:n2}", Total)</strong></p>
+            <button class="btn-vaciar" @onclick="VaciarCarrito">Vaciar carrito</button>
+            <button class="btn-comprar" @onclick="IrADatosPago">Realizar compra</button>
+        </div>
+    </div>
+}
+
+@code {
+    private List<CarritoItem> ListaCarrito = new();
+    private decimal Total => ListaCarrito.Sum(c => c.Cantidad * c.Producto.Precio);
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaCarrito = await CarritoService.ObtenerCarritoAsync();
+    }
+
+    private async Task VaciarCarrito()
+    {
+        ListaCarrito.Clear();
+        await CarritoService.VaciarCarritoAsync();
+    }
+
+    private async Task EliminarProducto(CarritoItem item)
+    {
+        ListaCarrito.Remove(item); // Eliminar el producto de la lista
+        await CarritoService.EliminarProductoAsync(item); // Eliminar el producto del carrito en el servicio
+    }
+
+    private void IrADatosPago()
+    {
+        NavigationManager.NavigateTo("/pago");
+    }
+}
+
+<style>
+    .titulo {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #6a1b9a;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 1.8em;
+    }
+
+    .carrito-vacio {
+        text-align: center;
+        font-size: 1.2em;
+        color: #666;
+        margin-top: 30px;
+    }
+
+    .carrito {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 10px;
+    }
+
+    .item-carrito {
+        display: flex;
+        align-items: center;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: relative; /* Necesario para posicionar la "X" */
+    }
+
+    .imagen-item {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 5px;
+        margin-right: 15px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+        .info-item h4 {
+            margin: 0;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .info-item p {
+            margin: 0;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+    .resumen {
+        text-align: right;
+        margin-top: 20px;
+    }
+
+        .resumen p {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+    .btn-vaciar {
+        padding: 10px 20px;
+        background-color: #d32f2f;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+
+        .btn-vaciar:hover {
+            background-color: #b71c1c;
+            transform: scale(1.05);
+        }
+
+    .btn-comprar {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+
+        .btn-comprar:hover {
+            background-color: #388e3c;
+            transform: scale(1.05);
+        }
+
+    .btn-eliminar {
+        position: absolute; /* Esto lo coloca en la esquina superior derecha */
+        top: 10px;
+        right: 10px;
+        background-color: transparent;
+        border: none;
+        color: #d32f2f;
+        font-size: 1.5em;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+        .btn-eliminar:hover {
+            transform: scale(1.1);
+        }
+
+</style>
